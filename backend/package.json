@@ -27,8 +27,8 @@
     "prisma": "^7.1.0"
   },
   "engines": {
-    "node": ">=20.0.0"
-  },
+  "node": "20.x"
+},
   "author": "Your Name",
   "license": "MIT"
 }
