@@ -1,57 +1,73 @@
-const express = require('express');
+// backend/src/routes/bookings.js
+const express = require("express");
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const { generateICS } = require('../services/ics');
 
-// GET /api/bookings/slots (dummy)
-router.get('/slots', async (req, res) => {
-  // In production you'd compute available slots subtracting busy blocks from CalDAV
-  const now = new Date();
-  const slots = [
-    { start: new Date(now.getTime() + 3600*1000).toISOString(), end: new Date(now.getTime() + 2*3600*1000).toISOString() },
-    { start: new Date(now.getTime() + 3*3600*1000).toISOString(), end: new Date(now.getTime() + 4*3600*1000).toISOString() }
-  ];
-  res.json({ slots });
+/*
+ |--------------------------------------------------------------------------
+ |  DEMO BOOKING ROUTES
+ |--------------------------------------------------------------------------
+ |  These routes power:
+ |   - GET  /api/bookings/slots   → returns available times
+ |   - POST /api/bookings/book    → handles booking submissions
+ |
+ |  This version works fully without a database.
+ |  Later we can upgrade to Prisma + PostgreSQL easily.
+ |--------------------------------------------------------------------------
+*/
+
+// Temporary in-memory demo slots (you can change these)
+let availableSlots = [
+  "Monday 10:00 AM",
+  "Monday 2:00 PM",
+  "Tuesday 11:00 AM",
+  "Wednesday 4:00 PM",
+];
+
+// ---------------------------------------------
+// GET /api/bookings/slots
+// ---------------------------------------------
+router.get("/slots", async (req, res) => {
+  try {
+    // Respond with the current list of available slots
+    res.json(availableSlots);
+  } catch (error) {
+    console.error("Error loading slots:", error);
+    res.status(500).json({ error: "Failed to load slots" });
+  }
 });
 
-// POST /api/bookings/request
-router.post('/request', async (req, res) => {
-  const { clientId=1, requestedStart, requestedEnd, details } = req.body;
-  const booking = await prisma.booking.create({ data: {
-    clientId,
-    clientRequestedStart: new Date(requestedStart),
-    clientRequestedEnd: new Date(requestedEnd),
-    status: 'pending_approval'
-  }});
-  res.json({ success: true, booking });
-});
+// ---------------------------------------------
+// POST /api/bookings/book
+// ---------------------------------------------
+router.post("/book", async (req, res) => {
+  try {
+    const { name, email, slot } = req.body;
 
-// PUT /api/bookings/:id/approve
-router.put('/:id/approve', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const { adminAdjustedStart, adminAdjustedEnd } = req.body;
-  const updated = await prisma.booking.update({ where: { id }, data: {
-    adminAdjustedStart: adminAdjustedStart ? new Date(adminAdjustedStart) : undefined,
-    adminAdjustedEnd: adminAdjustedEnd ? new Date(adminAdjustedEnd) : undefined,
-    status: 'approved'
-  }});
-  const ics = generateICS({
-    uid: `booking-${updated.id}`,
-    title: 'Booking Confirmed',
-    start: updated.adminAdjustedStart || updated.clientRequestedStart,
-    end: updated.adminAdjustedEnd || updated.clientRequestedEnd,
-    description: 'Your booking has been confirmed.'
-  });
-  res.json({ success: true, booking: updated, ics });
-});
+    if (!name || !email || !slot) {
+      return res
+        .status(400)
+        .json({ error: "Name, Email, and Slot are required." });
+    }
 
-// PUT /api/bookings/:id/decline
-router.put('/:id/decline', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const reason = req.body.reason || '';
-  const updated = await prisma.booking.update({ where: { id }, data: { status: 'declined' }});
-  res.json({ success: true, booking: updated });
+    // If slot does not exist anymore
+    if (!availableSlots.includes(slot)) {
+      return res.status(400).json({ error: "Slot is no longer available." });
+    }
+
+    // Remove slot (simulate booking)
+    availableSlots = availableSlots.filter((s) => s !== slot);
+
+    console.log(`New booking confirmed: ${name} (${email}) booked ${slot}`);
+
+    // Return success response
+    res.json({
+      message: "Booking confirmed!",
+      booked: { name, email, slot },
+    });
+  } catch (error) {
+    console.error("Error making booking:", error);
+    res.status(500).json({ error: "Failed to complete booking" });
+  }
 });
 
 module.exports = router;
