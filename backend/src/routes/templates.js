@@ -1,7 +1,8 @@
 const express = require('express');
 const router = require('express').Router();
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+import { prisma } from '../prisma.js';
+  datasourceUrl: process.env.DATABASE_URL,
+});
 
 router.get('/', async (req, res) => {
   const t = await prisma.emailTemplate.findMany();
