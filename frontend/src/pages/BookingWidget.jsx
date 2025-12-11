@@ -1,54 +1,88 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import AddToCalendarButtons from '../components/AddToCalendarButtons'
+import React, { useState } from "react";
+import api from "../lib/api"; // <-- uses VITE_API_URL automatically
 
-export default function BookingWidget(){
-  const [slots, setSlots] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+export default function BookingWidget() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [slots, setSlots] = useState([]);
+  const [status, setStatus] = useState("");
 
-  useEffect(()=>{
-    axios.get('/api/bookings/slots')
-      .then(r => setSlots(r.data.slots || []))
-      .catch(()=>setSlots([]))
-  },[])
+  // Load available booking slots
+  const loadSlots = async () => {
+    setStatus("Loading available slots...");
 
-  async function submit(){
-    if(!selected) { alert('pick a slot'); return; }
-    await axios.post('/api/bookings/request', {
-      clientId: 1,
-      requestedStart: selected.start,
-      requestedEnd: selected.end,
-      details: `Requested by ${name}`
-    })
-    alert('Request submitted — admin will confirm')
-  }
+    try {
+      const response = await api.get("/api/bookings/slots");
+      setSlots(response.data);
+      setStatus("Available slots loaded.");
+    } catch (error) {
+      console.error("Error loading slots:", error);
+      setStatus("Failed to load slots. Check backend connection.");
+    }
+  };
+
+  // Request booking creation
+  const requestBooking = async () => {
+    if (!name.trim() || !email.trim()) {
+      alert("Please enter both name and email.");
+      return;
+    }
+
+    setStatus("Sending booking request...");
+
+    try {
+      const response = await api.post("/api/bookings/request", {
+        name,
+        email,
+      });
+
+      setStatus("Booking request sent successfully!");
+      alert("Booking submitted!");
+      console.log(response.data);
+    } catch (error) {
+      console.error("Booking request failed:", error);
+      setStatus("Booking request failed. Check backend connection.");
+    }
+  };
 
   return (
-    <div className="bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-semibold">Book a time</h2>
-      <div className="mt-4">
-        <label className="block">Name</label>
-        <input value={name} onChange={e=>setName(e.target.value)} className="border p-2 w-full" />
-        <label className="block mt-2">Email</label>
-        <input value={email} onChange={e=>setEmail(e.target.value)} className="border p-2 w-full" />
+    <div style={{ padding: "20px", border: "1px solid #ddd" }}>
+      <h2>Book a time</h2>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label>
+          Name:
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{ marginLeft: "5px" }}
+          />
+        </label>
+
+        <label style={{ marginLeft: "15px" }}>
+          Email:
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ marginLeft: "5px" }}
+          />
+        </label>
       </div>
 
-      <div className="mt-4">
-        <h3 className="font-medium">Available slots</h3>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {slots.map((s,i)=> (
-            <button key={i} onClick={()=>setSelected(s)} className={`p-2 border rounded ${selected===s? 'bg-blue-100':''}`}>
-              {new Date(s.start).toLocaleString()} — {new Date(s.end).toLocaleTimeString()}
-            </button>
-          ))}
-        </div>
-      </div>
+      <button onClick={requestBooking}>Request Booking</button>
 
-      <div className="mt-4">
-        <button onClick={submit} className="bg-blue-600 text-white px-4 py-2 rounded">Request Booking</button>
-      </div>
+      <h3 style={{ marginTop: "20px" }}>Available slots</h3>
+      <button onClick={loadSlots}>Load Slots</button>
+
+      <ul style={{ marginTop: "10px" }}>
+        {slots.length > 0 ? (
+          slots.map((slot, index) => <li key={index}>{slot}</li>)
+        ) : (
+          <p>No slots loaded.</p>
+        )}
+      </ul>
+
+      <p style={{ marginTop: "10px", fontStyle: "italic" }}>{status}</p>
     </div>
-  )
+  );
 }

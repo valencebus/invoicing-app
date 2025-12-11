@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import api from '../lib/api'
 
 export default function AdminDashboard(){
   const [templates, setTemplates] = useState([])
 
   async function load(){
-    const r = await axios.get('/api/templates')
+    const r = await api.get('/api/templates')
     setTemplates(r.data || [])
   }
 
