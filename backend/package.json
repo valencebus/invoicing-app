@@ -10,7 +10,7 @@
     "prisma:migrate": "prisma migrate deploy"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^7.1.0",
     "@sendgrid/mail": "^8.1.5",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
@@ -27,8 +27,8 @@
     "prisma": "^7.1.0"
   },
   "engines": {
-  "node": "20.x"
-},
+    "node": "20.x"
+  },
   "author": "Your Name",
   "license": "MIT"
 }
