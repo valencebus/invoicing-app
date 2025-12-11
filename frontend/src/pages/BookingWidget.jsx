@@ -1,88 +1,63 @@
 import React, { useState } from "react";
-import api from "../lib/api"; // <-- uses VITE_API_URL automatically
+
+// ❗ IMPORTANT: USE YOUR RENDER BACKEND URL HERE
+const API_URL = import.meta.env.VITE_API_URL || "https://invoicing-app-s26l.onrender.com";
 
 export default function BookingWidget() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [slots, setSlots] = useState([]);
-  const [status, setStatus] = useState("");
 
-  // Load available booking slots
   const loadSlots = async () => {
-    setStatus("Loading available slots...");
-
     try {
-      const response = await api.get("/api/bookings/slots");
-      setSlots(response.data);
-      setStatus("Available slots loaded.");
-    } catch (error) {
-      console.error("Error loading slots:", error);
-      setStatus("Failed to load slots. Check backend connection.");
+      const res = await fetch(`${API_URL}/api/bookings/slots`);
+      if (!res.ok) throw new Error("Failed to load slots");
+
+      const data = await res.json();
+      setSlots(data);
+    } catch (err) {
+      console.error("Error loading slots:", err);
     }
   };
 
-  // Request booking creation
   const requestBooking = async () => {
-    if (!name.trim() || !email.trim()) {
-      alert("Please enter both name and email.");
-      return;
-    }
-
-    setStatus("Sending booking request...");
-
     try {
-      const response = await api.post("/api/bookings/request", {
-        name,
-        email,
+      const res = await fetch(`${API_URL}/api/bookings/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email })
       });
 
-      setStatus("Booking request sent successfully!");
-      alert("Booking submitted!");
-      console.log(response.data);
-    } catch (error) {
-      console.error("Booking request failed:", error);
-      setStatus("Booking request failed. Check backend connection.");
+      const data = await res.json();
+      alert(data.message || "Booking request sent!");
+
+    } catch (err) {
+      console.error("Error requesting booking:", err);
+      alert("Booking request failed");
     }
   };
 
   return (
-    <div style={{ padding: "20px", border: "1px solid #ddd" }}>
-      <h2>Book a time</h2>
+    <div>
+      <h1>Invoicing & Booking App (Demo)</h1>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>
-          Name:
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ marginLeft: "5px" }}
-          />
-        </label>
-
-        <label style={{ marginLeft: "15px" }}>
-          Email:
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ marginLeft: "5px" }}
-          />
-        </label>
+      <h3>Book a time</h3>
+      <div>
+        Name: <input value={name} onChange={e => setName(e.target.value)} />
+        Email: <input value={email} onChange={e => setEmail(e.target.value)} />
       </div>
 
-      <button onClick={requestBooking}>Request Booking</button>
-
-      <h3 style={{ marginTop: "20px" }}>Available slots</h3>
       <button onClick={loadSlots}>Load Slots</button>
 
-      <ul style={{ marginTop: "10px" }}>
-        {slots.length > 0 ? (
-          slots.map((slot, index) => <li key={index}>{slot}</li>)
-        ) : (
-          <p>No slots loaded.</p>
-        )}
+      <h3>Available slots</h3>
+      <ul>
+        {slots.length === 0 && <p>No slots loaded</p>}
+        {slots.map((slot, i) => (
+          <li key={i}>{slot}</li>
+        ))}
       </ul>
 
-      <p style={{ marginTop: "10px", fontStyle: "italic" }}>{status}</p>
+      <button onClick={requestBooking}>Request Booking</button>
     </div>
   );
 }
