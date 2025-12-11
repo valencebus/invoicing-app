@@ -18,54 +18,55 @@ model User {
 }
 
 model Client {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String
-  phone        String?
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String
+  phone          String?
   billingAddress String?
-  createdAt    DateTime @default(now())
-  bookings     Booking[]
+  createdAt      DateTime  @default(now())
+  bookings       Booking[]
+  invoices       Invoice[] // <-- back-relation added
 }
 
 model Booking {
-  id                    Int      @id @default(autoincrement())
-  clientId              Int
-  client                Client   @relation(fields: [clientId], references: [id])
-  status                String   @default("pending_approval")
-  clientRequestedStart  DateTime
-  clientRequestedEnd    DateTime
-  adminAdjustedStart    DateTime?
-  adminAdjustedEnd      DateTime?
-  calendarEventId       String?
-  createdAt             DateTime @default(now())
+  id                   Int       @id @default(autoincrement())
+  clientId             Int
+  client               Client    @relation(fields: [clientId], references: [id])
+  status               String    @default("pending_approval")
+  clientRequestedStart DateTime
+  clientRequestedEnd   DateTime
+  adminAdjustedStart   DateTime?
+  adminAdjustedEnd     DateTime?
+  calendarEventId      String?
+  createdAt            DateTime  @default(now())
 }
 
 model Invoice {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   clientId  Int
-  client    Client  @relation(fields: [clientId], references: [id])
+  client    Client   @relation(fields: [clientId], references: [id])
   items     Json
   subtotal  Float
   tax       Float
   total     Float
   dueDate   DateTime
-  status    String  @default("draft")
+  status    String   @default("draft")
   createdAt DateTime @default(now())
 }
 
 model Expense {
-  id        Int @id @default(autoincrement())
-  vendor    String
-  amount    Float
-  date      DateTime
-  category  String?
+  id         Int      @id @default(autoincrement())
+  vendor     String
+  amount     Float
+  date       DateTime
+  category   String?
   receiptUrl String?
-  rawOcr    Json?
-  createdAt DateTime @default(now())
+  rawOcr     Json?
+  createdAt  DateTime @default(now())
 }
 
 model EmailTemplate {
-  id        Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
   subject   String
   bodyHtml  String
@@ -75,7 +76,7 @@ model EmailTemplate {
 }
 
 model Setting {
-  id Int @id @default(autoincrement())
-  key String @unique
+  id    Int    @id @default(autoincrement())
+  key   String @unique
   value Json
 }
