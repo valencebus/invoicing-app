@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: invoicing
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - '6379:6379'
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/invoicing
+      REDIS_URL: redis://redis:6379
+      SENDGRID_API_KEY: 'replace'
+      EMAIL_FROM: 'noreply@example.com'
+    ports:
+      - '4000:4000'
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '5173:5173'
+
+volumes:
+  db-data:
