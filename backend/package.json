@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "Backend for invoicing and job tracking system",
   "main": "src/index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy"
-  },
+ "scripts": {
+  "generate": "prisma generate",
+  "start": "node src/index.js"
+},
+
   "dependencies": {
     "@prisma/client": "^7.1.0",
     "@sendgrid/mail": "^8.1.5",
