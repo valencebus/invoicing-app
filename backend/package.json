@@ -4,9 +4,8 @@
   "description": "Backend for invoicing and job tracking system",
   "main": "src/index.js",
  "scripts": {
-  "generate": "prisma generate",
-  "start": "node src/index.js"
-},
+  "generate": "echo \"No generate step required for file-store backend\"",
+  "build": "echo \"No build step required\""
 
   "dependencies": {
     "@prisma/client": "^7.1.0",
