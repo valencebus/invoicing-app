@@ -1,0 +1,20 @@
+{
+  "slots": [
+    "Monday 10:00 AM",
+    "Monday 2:00 PM",
+    "Tuesday 11:00 AM",
+    "Wednesday 4:00 PM"
+  ],
+  "bookings": [],
+  "clients": [],
+  "invoices": [],
+  "templates": [
+    {
+      "id": 1,
+      "name": "Default Booking Confirmation",
+      "subject": "Your booking is confirmed",
+      "bodyHtml": "<p>Thanks for booking with us.</p>",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
