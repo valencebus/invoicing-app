@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "Backend for invoicing and job tracking system",
   "main": "src/index.js",
- "scripts": {
+"scripts": {
+  "start": "node src/index.js",
+  "dev": "nodemon src/index.js",
   "generate": "echo \"No generate step required for file-store backend\"",
-  "build": "echo \"No build step required\""
+  "build": "echo \"No build step required\"",
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate deploy"
+},
 
   "dependencies": {
     "@prisma/client": "^7.1.0",

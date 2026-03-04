@@ -1,0 +1,59 @@
+(
+echo const fs = require('fs'^);
+echo const path = require('path'^);
+echo.
+echo const DATA_FILE = path.join(__dirname, '../../data/store.json'^);
+echo.
+echo const defaultData = {
+echo   slots: [
+echo     'Monday 10:00 AM',
+echo     'Monday 2:00 PM',
+echo     'Tuesday 11:00 AM',
+echo     'Wednesday 4:00 PM',
+echo   ],
+echo   bookings: [],
+echo   clients: [],
+echo   invoices: [],
+echo   templates: [
+echo     {
+echo       id: 1,
+echo       name: 'Default Booking Confirmation',
+echo       subject: 'Your booking is confirmed',
+echo       bodyHtml: '^<p^>Thanks for booking with us.^</p^>',
+echo       createdAt: new Date(^).toISOString(^),
+echo     },
+echo   ],
+echo };
+echo.
+echo function ensureDataFile(^) {
+echo   const dir = path.dirname(DATA_FILE^);
+echo   if ^(!fs.existsSync(dir^)^) {
+echo     fs.mkdirSync(dir, { recursive: true }^);
+echo   }
+echo.
+echo   if ^(!fs.existsSync(DATA_FILE^)^) {
+echo     fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2^)^);
+echo   }
+echo }
+echo.
+echo function readData(^) {
+echo   ensureDataFile(^);
+echo   const raw = fs.readFileSync(DATA_FILE, 'utf8'^);
+echo   return JSON.parse(raw^);
+echo }
+echo.
+echo function writeData(data^) {
+echo   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2^)^);
+echo }
+echo.
+echo function nextId(items^) {
+echo   if ^(!items.length^) return 1;
+echo   return Math.max(...items.map((item^) =^> item.id ^|^| 0^)^) + 1;
+echo }
+echo.
+echo module.exports = {
+echo   readData,
+echo   writeData,
+echo   nextId,
+echo };
+) > backend\src\data\store.js
